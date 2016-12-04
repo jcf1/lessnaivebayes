@@ -1,0 +1,1 @@
+perl -nE '/.*,(.*)/ or next; $a=$1; @tags=(); push @tags, $1 while $a=~s/#(\w+) //; say lc." $a" for @tags' shakespeare-1.txt bible-1.txt | grep '^shakespeare \|^bible '
