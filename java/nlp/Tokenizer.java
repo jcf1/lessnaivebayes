@@ -25,19 +25,6 @@ import java.lang.System;
  *  This class performs tokenization of UTF-8 encoded text files.
  */
 public class Tokenizer {
-
-	/**
-	 *  This flag should be set to 'true' if all diacritics (accents etc.)
-	 *  should be removed.
-	 */
-	public boolean remove_diacritics = true;
-
-	/**
-	 *  This flag should be set to 'true' if all punctuation (full stops etc.)
-	 *  should be removed.
-	 */
-	public boolean remove_punctuation = true;
-
 	/**
 	 *	The size of the buffer should be considerably larger than
 	 *  the anticipated length of the longest token.
@@ -68,31 +55,19 @@ public class Tokenizer {
 	/** The patterns matching non-standard words (e-mail addresses, etc.) */
 	ArrayList<Pattern> patterns = null;
 
-	/** Special characters (with diacritics) can be translated into these characters. */
-	public static final char[] SPECIAL_CHAR_MAPPING = {
-		'A', 'A', 'A', 'A', 'A', 'A', 'E', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', '*', 'O', 'U', 'U', 'U', 'U', 'Y', 'T', 'S', 'a', 'a', 'a', 'a', 'a', 'a', 'e', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'd', 'n', 'o', 'o', 'o', 'o', 'o', '/', 'o', 'u', 'u', 'u', 'u', 'y', 't', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C', 'c', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'J', 'j', 'J', 'j', 'K', 'k', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'N', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'O', 'o', 'R', 'r', 'R', 'r', 'R', 'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z', 'z' };
-
-
 	/* ------------------------------ */
 
 
 	/**
 	 *  Constructor
 	 *  @param reader The reader from which to read the text to be tokenized.
-	 *  @param remove_diacritics Should be set to <code>true</code> if diacritics
-	 *         should be removed (e.g. é will be e).
-	 *  @param remove_punctuation Should be set to <code>true</code> if punctuation
-	 *         should be removed (useful in some applications).
-	 *  @param pattern_file The name of the file containing regular expressions
-	 *         for non-standard words (like dates, mail addresses, etc.).
 	 */
-	public Tokenizer( Reader reader, boolean remove_diacritics, boolean remove_punctuation, String pattern_file ) {
+	public Tokenizer(Reader reader) {
 		this.reader = reader;
-		this.remove_diacritics = remove_diacritics;
-		this.remove_punctuation = remove_punctuation;
-		if ( pattern_file != null ) {
-			readPatterns( pattern_file );
-		}
+		patterns = new ArrayList<Pattern>();
+		patterns.add(Pattern.compile("\\w+://\\S+"));
+		patterns.add(Pattern.compile("@[\\w-]+"));
+		patterns.add(Pattern.compile("\\W"));
 	}
 
 
@@ -111,31 +86,6 @@ public class Tokenizer {
 		return false;
 	}
 
-
-	/**
-	 *  Read the patterns that match non-standard words
-	 */
-	private void readPatterns( String filename ) {
-		patterns = new ArrayList<Pattern>();
-		String line = null;
-		try {
-			BufferedReader in = new BufferedReader( new FileReader( filename ));
-			while (( line = in.readLine()) != null ) {
-				line = line.trim();
-				if ( !line.startsWith( "//" ) && line.length() > 0 ) {
-					patterns.add( Pattern.compile( line ));
-				}
-			}
-		}
-		catch ( IOException e ) {
-			e.printStackTrace();
-		}
-		catch ( PatternSyntaxException e ) {
-			System.err.println( "ERROR: Malformed regular expression: " + line );
-		}
-	}
-
-
 	/**
 	 *  Normalizes letters by converting to lower-case and possibly
 	 *  removing diacritics. This method is also used for checking
@@ -146,24 +96,9 @@ public class Tokenizer {
 	 */
 	public boolean normalize( char[] buf, int ptr ) {
 		char c = buf[ptr];
-		if ( Character.isLetter( c )) {
-			if ( remove_diacritics ) {
-				// Remove diacritics by mapping to the closest character
-				// without diacritics.
-				if ( c >= '\u00c0' && c <= '\u017e' ) {
-					System.err.print( c );
-					c = SPECIAL_CHAR_MAPPING[(int)(c-'\u00c0')];
-					System.err.println( c );
-				}
-			}
+		if (Character.isLetter(c))
 			buf[ptr] = Character.toLowerCase( c );
-			return true;
-		}
-		if ( c >= '!' && c <= '~' ) {
-			return true;
-		}
-		// This is not a character that can occur in a token.
-		return false;
+		return !Character.isWhitespace(c);
 	}
 
 
@@ -302,10 +237,6 @@ public class Tokenizer {
 				if ( t.length()>0 ) {
 					token_queue.add( t );
 					smallbuf = new StringBuffer();
-					tokens_found = true;
-				}
-				if ( !remove_punctuation ) {
-					token_queue.add( "" + s.charAt( i ));
 					tokens_found = true;
 				}
 			}
