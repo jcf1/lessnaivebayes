@@ -60,6 +60,7 @@ public class NaiveBayesTextClassifier {
 
 		Iterator<String> it = d.iterator();
 		if(!useBigram) {
+			System.out.println("Not Using Bigram");
 			while (it.hasNext()) {
 				String w = it.next();
 				for (int i = priorProb.length-1; i >= 0; i--) {
@@ -78,21 +79,22 @@ public class NaiveBayesTextClassifier {
 			}
 			return catName[guess];
 		} else {
+			System.out.println("Using Bigram");
 			String lastWord = "";
 			while(it.hasNext()) {
 				String w = it.next();
 				for (int i = priorProb.length-1; i >= 0; i--) {
-					HashMap<String,Double> counts = bigramProbs.get(i).get(w);
+					HashMap<String,Double> counts = bigramProbs.get(i).get(lastWord);
 					Double prob = 0.0;
 					if(counts != null) {
-						prob = counts.get(lastWord);
+						prob = counts.get(w);
 						if (prob == null) {
 							prob = unknownWordProb;
 						}
 					} else {
 						prob = unknownWordProb;
 					}
-					postProb[i] += d.countBigram(w, lastWord) * prob;
+					postProb[i] += d.countBigram(lastWord, w) * prob;
 				}
 				lastWord = w;
 			}
@@ -221,11 +223,11 @@ public class NaiveBayesTextClassifier {
 	 *   file. If test file is null, read input from the keyboard.
 	 */
 	public NaiveBayesTextClassifier( String training_file, String test_file, boolean useBigram, double threshold, int maxCategories ) {
-		buildModel( new Dataset( training_file ));
-		classifyTestset( new Dataset( test_file ));
 		this.useBigram = useBigram;
 		this.threshold = threshold;
 		this.maxCategories = maxCategories;
+		buildModel( new Dataset( training_file ));
+		classifyTestset( new Dataset( test_file ));
 	}
 
 	/** Prints usage information. */
