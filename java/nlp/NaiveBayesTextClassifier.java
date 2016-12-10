@@ -58,9 +58,8 @@ public class NaiveBayesTextClassifier {
 			postProb[i] = priorProb[i];
 		}
 
-		Iterator<String> it = d.iterator();
 		if(!useBigram) {
-			System.out.println("Not Using Bigram");
+			Iterator<String> it = d.iterator();
 			while (it.hasNext()) {
 				String w = it.next();
 				for (int i = priorProb.length-1; i >= 0; i--) {
@@ -79,28 +78,40 @@ public class NaiveBayesTextClassifier {
 			}
 			return catName[guess];
 		} else {
-			System.out.println("Using Bigram");
-			String lastWord = "";
-			while(it.hasNext()) {
-				String w = it.next();
-				for (int i = priorProb.length-1; i >= 0; i--) {
-					HashMap<String,Double> counts = bigramProbs.get(i).get(lastWord);
-					Double prob = 0.0;
-					if(counts != null) {
-						prob = counts.get(w);
-						if (prob == null) {
+			try {
+				Tokenizer tokens = d.readText();
+				String lastWord = "";
+				while(tokens.hasMoreTokens()) {
+					String w = tokens.nextToken();
+					for (int i = priorProb.length-1; i >= 0; i--) {
+						HashMap<String,Double> counts = bigramProbs.get(i).get(lastWord);
+						Double prob = 0.0;
+						if(counts != null) {
+							prob = counts.get(w);
+							if (prob == null) {
+								prob = unknownWordProb;
+							}
+						} else {
 							prob = unknownWordProb;
 						}
-					} else {
-						prob = unknownWordProb;
+						postProb[i] += d.countBigram(lastWord, w) * prob;
 					}
-					postProb[i] += d.countBigram(lastWord, w) * prob;
+					lastWord = w;
 				}
-				lastWord = w;
 			}
+			catch ( IOException e ) {
+				e.printStackTrace();
+			}
+			int guess = 0;
+			for (int i = 1; i < priorProb.length; i++) {
+				if (postProb[guess] < postProb[i]) {
+					guess = i;
+				}
+			}
+			return catName[guess];
 		}
 
-		int count = 0;
+		/*int count = 0;
 		int[] guesses = new int[maxCategories];
 		double[] probs = new double[maxCategories];
 
@@ -132,7 +143,7 @@ public class NaiveBayesTextClassifier {
 			result += i + ". " + guesses[i] + " " + probs[i] + "\n";
 		}
 
-		return result;
+		return result;*/
 	}
 
 	/**
