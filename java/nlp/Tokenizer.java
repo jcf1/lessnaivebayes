@@ -66,6 +66,7 @@ public class Tokenizer {
 		this.reader = reader;
 		patterns = new ArrayList<Pattern>();
 		patterns.add(Pattern.compile("\\w+://\\S+"));
+		patterns.add(Pattern.compile("[\\w']+"));
 		patterns.add(Pattern.compile("@[\\w-]+"));
 		patterns.add(Pattern.compile("\\W"));
 	}
