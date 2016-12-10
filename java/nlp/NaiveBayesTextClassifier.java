@@ -70,13 +70,6 @@ public class NaiveBayesTextClassifier {
 					postProb[i] += d.count(w)*prob;
 				}
 			}
-			int guess = 0;
-			for (int i = 1; i < priorProb.length; i++) {
-				if (postProb[guess] < postProb[i]) {
-					guess = i;
-				}
-			}
-			return catName[guess];
 		} else {
 			try {
 				Tokenizer tokens = d.readText();
@@ -102,50 +95,51 @@ public class NaiveBayesTextClassifier {
 			catch ( IOException e ) {
 				e.printStackTrace();
 			}
+		}
+
+		String result = "";
+		if(maxCategories == 1) {
 			int guess = 0;
 			for (int i = 1; i < priorProb.length; i++) {
 				if (postProb[guess] < postProb[i]) {
 					guess = i;
 				}
 			}
-			return catName[guess];
-		}
+			result = catName[guess];
+		} else {
+			int count = 0;
+			int[] guesses = new int[maxCategories];
+			double[] probs = new double[maxCategories];
 
-		//DON'T REMOVE THIS COMMENTED CODE
-		
-		/*int count = 0;
-		int[] guesses = new int[maxCategories];
-		double[] probs = new double[maxCategories];
-
-		for (int i = 0; i < priorProb.length; i++) {
-			double guess = postProb[i];
-			if(guess > threshold && (count < maxCategories || guess > probs[maxCategories - 1])) {
-				int index = count;
-				for(int j = 0; j < count; j++) {
-					if(guess > probs[j]) {
-						index = j;
-						break;
+			for (int i = 0; i < priorProb.length; i++) {
+				double guess = postProb[i];
+				if(guess > threshold && (count < maxCategories || guess > probs[maxCategories - 1])) {
+					int index = count;
+					for(int j = 0; j < count; j++) {
+						if(guess > probs[j]) {
+							index = j;
+							break;
+						}
+					}
+					int ind = i;
+					double val = guess;
+					for(int j = index; j < count; j++) {
+						int tempInd = guesses[j];
+						double tempVal = probs[j];
+						guesses[j] = ind;
+						probs[j] = val;
+						ind = tempInd;
+						val = tempVal;
 					}
 				}
-				int ind = i;
-				double val = guess;
-				for(int j = index; j < count; j++) {
-					int tempInd = guesses[j];
-					double tempVal = probs[j];
-					guesses[j] = ind;
-					probs[j] = val;
-					ind = tempInd;
-					val = tempVal;
-				}
+			}
+
+			for(int i = 0; i < count; i++) {
+				result += i + ". " + guesses[i] + " " + probs[i] + "\n";
 			}
 		}
-
-		String result = "";
-		for(int i = 0; i < count; i++) {
-			result += i + ". " + guesses[i] + " " + probs[i] + "\n";
-		}
-
-		return result;*/
+		
+		return result;
 	}
 
 	/**
