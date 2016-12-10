@@ -111,6 +111,8 @@ public class NaiveBayesTextClassifier {
 			return catName[guess];
 		}
 
+		//DON'T REMOVE THIS COMMENTED CODE
+		
 		/*int count = 0;
 		int[] guesses = new int[maxCategories];
 		double[] probs = new double[maxCategories];
