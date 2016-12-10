@@ -10,10 +10,11 @@ if ARGV[0] =~ /,/
 	ARGV.shift
 end
 
+s = []
+t = {}
+
 ARGV.each do |file|
 	CSV.open file do |csv|
-		s = []
-		t = {}
 		csv.gets # remove header
 		csv.each do |id,date,by,text|
 			tags = []
@@ -26,14 +27,14 @@ ARGV.each do |file|
 				s.push "#{tag} #{text.gsub "\n", " "}"
 			end
 		end
-
-		puts t.size
-		puts t.keys.join "\n"
-
-		s.uniq!
-		puts s.size
-		s.each do |ln|
-			puts ln
-		end
 	end
+end
+
+puts t.size
+puts t.keys.join "\n"
+
+s.uniq!
+puts s.size
+s.each do |ln|
+	puts ln
 end
