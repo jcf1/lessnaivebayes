@@ -1,6 +1,15 @@
 #!/usr/bin/env ruby
 require 'csv'
 
+allowed = nil
+if ARGV[0] =~ /,/
+	allowed = {}
+	ARGV[0].split(",").each do |tag|
+		allowed[tag] = 1
+	end
+	ARGV.shift
+end
+
 ARGV.each do |file|
 	CSV.open file do |csv|
 		s = []
@@ -12,6 +21,7 @@ ARGV.each do |file|
 				tags.push $1.downcase
 			end
 			tags.each do |tag|
+				allowed and !allowed[tag] and next
 				t[tag] = 1
 				s.push "#{tag} #{text.gsub "\n", " "}"
 			end
@@ -19,6 +29,9 @@ ARGV.each do |file|
 
 		puts t.size
 		puts t.keys.join "\n"
+
+		s.uniq!
+		puts s.size
 		s.each do |ln|
 			puts ln
 		end
