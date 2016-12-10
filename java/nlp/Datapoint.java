@@ -1,9 +1,9 @@
-/*  
+/*
  *  This file is part of the computer assignment for the
  *  Natural Language Processing course at Williams.
- * 
+ *
  *  Author: Johan Boye
- */  
+ */
 
 
 package nlp;
@@ -13,54 +13,83 @@ import java.io.*;
 
 
 /**
- *   This class represents a text as a bag-of-words + a category. 
+ *   This class represents a text as a bag-of-words + a category.
  */
 public class Datapoint {
 
-	/** The text represented as a map from the word to the number of occurrences. */
-	private HashMap<String,Integer> word = new HashMap<String,Integer>();
+    /** The text represented as a map from the word to the number of occurrences. */
+    private HashMap<String,Integer> word = new HashMap<String,Integer>();
 
-	/** The total number of words in the text. */
-	public int noOfWords;
+    private HashMap<String,HashMap<String,Integer>> bigramCount = new HashMap<String,HashMap<String,Integer>>();
 
-	/** The category. */
-	public String cat;
+    /** The total number of words in the text. */
+    public int noOfWords;
 
-	public Datapoint( String text, String cat ) {
-		this.cat = cat;
-		try {
-			StringReader reader = new StringReader( text + "\n" );
-			Tokenizer tok = new Tokenizer( reader );
-			while ( tok.hasMoreTokens() ) { 
-				noOfWords++;
-				String w = tok.nextToken();
-				System.out.println(w);
-				Integer count = word.get( w );
-				if ( count == null ) {
-					count = 1;
-				}
-				else {
-					count++;
-				}
-				word.put( w, count );
-			}
-		}
-		catch ( IOException e ) {
-			e.printStackTrace();
-		}
+    /** The category. */
+    public String cat;
+
+    public Datapoint( String text, String cat ) {
+	this.cat = cat;
+	try {
+	    StringReader reader = new StringReader( text + "\n" );
+	    Tokenizer tok = new Tokenizer( reader );
+      String lastWord = "";
+	    while ( tok.hasMoreTokens() ) {
+    		noOfWords++;
+    		String w = tok.nextToken();
+    		Integer count = word.get( w );
+    		if ( count == null ) {
+    		    count = 1;
+    		}
+    		else {
+    		    count++;
+    		}
+    		word.put( w, count );
+
+        HashMap<String,Integer> counts = bigramCount.get(lastWord);
+        if(counts == null) {
+          counts = new HashMap<String,Integer>();
+        }
+        count = counts.get(w);
+        if(count == null) {
+          count = 1;
+        } else {
+          count++;
+        }
+        counts.put(w, count);
+        bigramCount.put(lastWord, counts);
+        lastWord = w;
+	    }
 	}
-
-
-	public Iterator<String> iterator() {
-		return word.keySet().iterator();
+	catch ( IOException e ) {
+	    e.printStackTrace();
 	}
+    }
 
-	public Integer count( String w ) {
-		return word.get( w );
-	}
 
-	public String toString() {
-		return word.toString();
-	}
+    public Iterator<String> iterator() {
+	return word.keySet().iterator();
+    }
+
+    public Integer count( String w ) {
+	return word.get( w );
+    }
+
+    public HashMap<String,Integer> getBigrams(String word) {
+      return bigramCount.get(word);
+    }
+
+    public Integer countBigram(String w1, String w2) {
+      HashMap<String,Integer> counts = bigramCount.get(w1);
+      if(counts == null) {
+        return null;
+      }
+      //System.out.println(w1 + " " + w2 + " " + bigramCount);
+      return counts.get(w2);
+    }
+
+    public String toString() {
+	return word.toString();
+    }
 
 }
