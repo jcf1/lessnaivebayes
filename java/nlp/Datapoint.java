@@ -17,6 +17,8 @@ import java.io.*;
  */
 public class Datapoint {
 
+	public final String text;
+
 	/** The text represented as a map from the word to the number of occurrences. */
 	private HashMap<String,Integer> word = new HashMap<String,Integer>();
 
@@ -29,6 +31,7 @@ public class Datapoint {
 	public String cat;
 
 	public Datapoint( String text, String cat ) {
+		this.text = text;
 		this.cat = cat;
 		try {
 			StringReader reader = new StringReader( text + "\n" );

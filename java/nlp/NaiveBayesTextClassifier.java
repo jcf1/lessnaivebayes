@@ -212,7 +212,7 @@ public class NaiveBayesTextClassifier {
 		while ( iter.hasNext() ) {
 			Datapoint dp = iter.next();
 			String cat = classifyDatapoint( dp );
-			System.out.println( cat );
+			System.out.println( cat + dp.text );
 		}
 	}
 
