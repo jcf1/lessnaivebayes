@@ -43,7 +43,6 @@ public class NaiveBayesTextClassifier {
 
 	boolean useBigram;
 	double threshold;
-	int minCategories;
 	int maxCategories;
 
 	/**
@@ -154,6 +153,7 @@ public class NaiveBayesTextClassifier {
 			HashMap<String,Integer> freq = new HashMap<String,Integer>();
 			HashMap<String,HashMap<String,Integer>> freq2 = new HashMap<String, HashMap<String,Integer>>();
 
+			freq.put("", set.noOfDatapoints[i]);
 			priorProb[i] = Math.log(set.noOfDatapoints[i]) - Math.log(set.totNoOfDatapoints);
 
 			for (Datapoint p : set.point) {
@@ -220,12 +220,11 @@ public class NaiveBayesTextClassifier {
 	 *   Constructor. Read the training file and, possibly, the test
 	 *   file. If test file is null, read input from the keyboard.
 	 */
-	public NaiveBayesTextClassifier( String training_file, String test_file, boolean useBigram, double threshold, int minCategories, int maxCategories ) {
+	public NaiveBayesTextClassifier( String training_file, String test_file, boolean useBigram, double threshold, int maxCategories ) {
 		buildModel( new Dataset( training_file ));
 		classifyTestset( new Dataset( test_file ));
 		this.useBigram = useBigram;
 		this.threshold = threshold;
-		this.minCategories = minCategories;
 		this.maxCategories = maxCategories;
 	}
 
@@ -237,7 +236,6 @@ public class NaiveBayesTextClassifier {
 		System.err.println( "  -bi : Use Bigram Probabilities (optional, default Unigram)" );
 		System.err.println( "  -th <double> : Only return a category above this threshold score (optional, defualt negative infinity)");
 		System.err.println( "  -max <int> : Maximum amount of categories that is returned (optional, default 1)" );
-		System.err.println( "  -min <int> : Minimum amount of categories that is returned (optional, default 1)" );
 	}
 
 	public static void main( String[] args ) {
@@ -246,7 +244,6 @@ public class NaiveBayesTextClassifier {
 		String test_file = null;
 		boolean useBigram = false;
 		double threshold = Double.NEGATIVE_INFINITY;
-		int minCategories = 1;
 		int maxCategories = 1;
 		int i = 0;
 		while ( i<args.length ) {
@@ -304,28 +301,13 @@ public class NaiveBayesTextClassifier {
 					return;
 				}
 			}
-			else if ( args[i].equals( "-min" )) {
-				i++;
-				if ( i<args.length ) {
-					try {
-						minCategories = Integer.parseInt(args[i++]);
-					} catch(NumberFormatException e) {
-						printHelpMessage();
-						return;
-					}
-				}
-				else {
-					printHelpMessage();
-					return;
-				}
-			}
 			else {
 				printHelpMessage();
 				return;
 			}
 		}
 		if ( training_file != null && test_file != null ) {
-			new NaiveBayesTextClassifier( training_file, test_file, useBigram, threshold, minCategories, maxCategories );
+			new NaiveBayesTextClassifier( training_file, test_file, useBigram, threshold, maxCategories );
 		}
 		else {
 			printHelpMessage();
