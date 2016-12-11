@@ -18,6 +18,7 @@ ARGV.each do |file|
 		csv.gets # remove header
 		csv.each do |id,date,by,text|
 			tags = []
+			text.gsub! /@\S+/, "@"
 			while text.sub! /#(\S+)/, "#"
 				tags.push $1.downcase
 			end
