@@ -242,7 +242,9 @@ public class NaiveBayesTextClassifier {
 		System.err.println( "The following parameters are available: " );
 		System.err.println( "  -d <filename> : training file (mandatory)");
 		System.err.println( "  -t <filename> : test file (mandatory)" );
-		System.err.println( "  -bi : Use Bigram Probabilities (optional, default Unigram)" );
+		System.err.println( "  -1 : Force use of unigrams (default)" );
+		System.err.println( "  -2 : Use bigram probabilities" );
+		System.err.println( "  -bi : Compatibility name for -2" );
 		System.err.println( "  -th <double> : Only return a category above this threshold score (optional, defualt negative infinity)");
 		System.err.println( "  -max <int> : Maximum amount of categories that is returned (optional, default 1)" );
 	}
@@ -276,7 +278,11 @@ public class NaiveBayesTextClassifier {
 					return;
 				}
 			}
-			else if ( args[i].equals( "-bi" )) {
+			else if ( args[i].equals( "-1" )) {
+				i++;
+				useBigram = false;
+			}
+			else if ( args[i].equals( "-2" ) ||  args[i].equals( "-bi" )) {
 				i++;
 				useBigram = true;
 			}
