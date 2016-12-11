@@ -23,7 +23,7 @@ for gram in $grams; do
 	while [ $((cats-=1)) -ge 0 ]; do
 		read cat
 		export cat
-		pos=`sed "1,$(($(head -1 "$2")+1))d" "tmp/out$$.$gram" | tee pos | awk '$1==ENVIRON["cat"]' | wc -l | awk '{print $1}'`
+		pos=`sed "1,$(($(head -1 "$2")+1))d" "tmp/out$$.$gram" | awk '$1==ENVIRON["cat"]' | wc -l | awk '{print $1}'`
 		fp=`awk '$1==">" && $2==ENVIRON["cat"]' "tmp/out$$.$gram.wrong" | wc -l | awk '{print $1}'`
 		fn=`awk '$1=="<" && $2==ENVIRON["cat"]' "tmp/out$$.$gram.wrong" | wc -l | awk '{print $1}'`
 		tp=$((pos-fp))
