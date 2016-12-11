@@ -23,21 +23,17 @@
 	program, and reports accuracy statistics for the run according to the
 	categories given in the testing dataset
 	```
-	% sh java_testwith.sh data/happy,sad,angry-1.set data/happy,sad,angry-2.set 
-	51147 1-gram * accuracy 66.88% (5414/8095) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 1-gram happy precision 65.51% (2223/3393) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 1-gram happy recall 75.15% (2223/2958) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 1-gram sad precision 78.70% (2251/2860) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 1-gram sad recall 61.68% (2251/3649) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 1-gram angry precision 51.00% (939/1841) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 1-gram angry recall 63.10% (939/1488) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 2-gram * accuracy 47.89% (3877/8095) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 2-gram happy precision 48.35% (894/1849) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 2-gram happy recall 30.22% (894/2958) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 2-gram sad precision 80.51% (1814/2253) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 2-gram sad recall 49.71% (1814/3649) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 2-gram angry precision 29.25% (1168/3992) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
-	51147 2-gram angry recall 78.49% (1168/1488) data/happy,sad,angry-1.set data/happy,sad,angry-2.set
+	% sh java_testwith.sh data/love,politics-1.set data/love,politics-2.set
+	51374 1-gram * accuracy 65.51% (228/348) data/love,politics-1.set data/love,politics-2.set
+	51374 1-gram love precision 41.26% (78/189) data/love,politics-1.set data/love,politics-2.set
+	51374 1-gram love recall 89.65% (78/87) data/love,politics-1.set data/love,politics-2.set
+	51374 1-gram politics precision 94.33% (150/159) data/love,politics-1.set data/love,politics-2.set
+	51374 1-gram politics recall 57.47% (150/261) data/love,politics-1.set data/love,politics-2.set
+	51374 2-gram * accuracy 46.55% (162/348) data/love,politics-1.set data/love,politics-2.set
+	51374 2-gram love precision 30.73% (79/257) data/love,politics-1.set data/love,politics-2.set
+	51374 2-gram love recall 90.80% (79/87) data/love,politics-1.set data/love,politics-2.set
+	51374 2-gram politics precision 91.20% (83/91) data/love,politics-1.set data/love,politics-2.set
+	51374 2-gram politics recall 31.80% (83/261) data/love,politics-1.set data/love,politics-2.set
 	```
 
 -	`java_run.sh` and `java_bigram_run.sh` respectively run the program with 
@@ -85,7 +81,31 @@ Takes two arguments: a training set and a testing set. Trains on the training
 set and runs on the testing set in both unigram and bigram modes, then reports
 on the accuracy, precision, and recall.
 
+```
+% sh java_testwith.sh data/love,politics-1.set data/love,politics-2.set
+51374 1-gram * accuracy 65.51% (228/348) data/love,politics-1.set data/love,politics-2.set
+51374 1-gram love precision 41.26% (78/189) data/love,politics-1.set data/love,politics-2.set
+51374 1-gram love recall 89.65% (78/87) data/love,politics-1.set data/love,politics-2.set
+51374 1-gram politics precision 94.33% (150/159) data/love,politics-1.set data/love,politics-2.set
+51374 1-gram politics recall 57.47% (150/261) data/love,politics-1.set data/love,politics-2.set
+51374 2-gram * accuracy 46.55% (162/348) data/love,politics-1.set data/love,politics-2.set
+51374 2-gram love precision 30.73% (79/257) data/love,politics-1.set data/love,politics-2.set
+51374 2-gram love recall 90.80% (79/87) data/love,politics-1.set data/love,politics-2.set
+51374 2-gram politics precision 91.20% (83/91) data/love,politics-1.set data/love,politics-2.set
+51374 2-gram politics recall 31.80% (83/261) data/love,politics-1.set data/love,politics-2.set
+```
+
+Output fields are, in order, a relatively unique ID (a PID), the type of model
+used, each category and the statistic computed on the category, a percentage, a
+fraction, and the two datasets.
+
+Tests are run in parallel, so they work faster on a computer with multiple
+processors.
+
 ## java_testcross.sh
 
 Takes any number of files as input, and pairs them all up and runs the above on
-each pair.
+each pair. Output is the same, but is longer and can have more than one
+
+Like `java_testwith.sh`, this script also tries to parallelize the tests as
+much as possible.
