@@ -158,7 +158,9 @@ public class NaiveBayesTextClassifier {
 		priorProb = new double[set.noOfCategories];
 		HashSet<String> vocav = new HashSet<String>();
 
+		System.out.println(set.noOfCategories);
 		for (int i = 0; i < set.noOfCategories; i++) {
+			System.out.println(catName[i]);
 			HashMap<String,Integer> freq = new HashMap<String,Integer>();
 			HashMap<String,HashMap<String,Integer>> freq2 = new HashMap<String, HashMap<String,Integer>>();
 
@@ -217,6 +219,7 @@ public class NaiveBayesTextClassifier {
 	 *   to the model.
 	 */
 	void classifyTestset( Dataset testset ) {
+		System.out.println(testset.totNoOfDatapoints);
 		Iterator<Datapoint> iter = testset.iterator();
 		while ( iter.hasNext() ) {
 			Datapoint dp = iter.next();
