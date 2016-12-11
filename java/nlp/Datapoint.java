@@ -70,7 +70,7 @@ public class Datapoint {
 	}
 
 	public Tokenizer readText() {
-		StringReader reader = new StringReader( text + "\n" );
+		StringReader reader = new StringReader( text );
 		return new Tokenizer( reader );
 	}
 

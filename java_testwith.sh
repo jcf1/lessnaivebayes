@@ -35,11 +35,14 @@ for gram in $grams; do
 
 		#recall
 
-		denom=$((tp+fn))
+		denom=`sed "1,$(($(head -1 "$2")+1))d" "$2" | awk '$1==ENVIRON["cat"]' | wc -l | awk '{print $1}'`
+		#denom=$((tp+fn))
 		percent=$((100*tp/denom))
 		decimal=$((10000*tp/denom-100*percent))
 		printf "$$ $gram-gram $cat recall %2d.%02d%% ($tp/$denom) %s %s\\n" $percent $decimal "$1" "$2"
 	done
+
+	ruby scripts/confusion.rb "$$ $gram-gram %d confusion" "$2" "tmp/out$$.$gram"
 } < "$2" &
 pids="${pids# } $!"
 done

@@ -18,14 +18,14 @@ ARGV.each do |file|
 		csv.gets # remove header
 		csv.each do |id,date,by,text|
 			tags = []
-			text.gsub! /@\S+/, "@"
+			#text.gsub! /@\S+/, "@"
 			while text.sub! /#(\S+)/, "#"
 				tags.push $1.downcase
 			end
 			tags.each do |tag|
 				allowed and !allowed[tag] and next
 				t[tag] = 1
-				s.push "#{tag} #{text.sub(/^\s+/, "").sub(/\s+$/, "").gsub /\s+/, " "}"
+				s.push "#{tag} #{text.strip.gsub /\s+/, " "}"
 			end
 		end
 	end

@@ -58,7 +58,7 @@ public class NaiveBayesTextClassifier {
 			postProb[i] = priorProb[i];
 		}
 
-		if(!useBigram) {
+		if (!useBigram) {
 			Iterator<String> it = d.iterator();
 			while (it.hasNext()) {
 				String w = it.next();
@@ -70,24 +70,21 @@ public class NaiveBayesTextClassifier {
 					postProb[i] += d.count(w)*prob;
 				}
 			}
-		} else {
+		}
+		else {
 			try {
 				Tokenizer tokens = d.readText();
 				String lastWord = "";
-				while(tokens.hasMoreTokens()) {
+				while (tokens.hasMoreTokens()) {
 					String w = tokens.nextToken();
 					for (int i = priorProb.length-1; i >= 0; i--) {
 						HashMap<String,Double> counts = bigramProbs.get(i).get(lastWord);
-						Double prob = 0.0;
-						if(counts != null) {
-							prob = counts.get(w);
-							if (prob == null) {
-								prob = unknownWordProb;
-							}
-						} else {
+						if (counts == null)
+							counts = likelihood.get(i);
+						Double prob = counts.get(w);
+						if (prob == null)
 							prob = unknownWordProb;
-						}
-						postProb[i] += d.countBigram(lastWord, w) * prob;
+						postProb[i] += prob;
 					}
 					lastWord = w;
 				}
@@ -156,10 +153,11 @@ public class NaiveBayesTextClassifier {
 		catName = set.catName;
 		catIndex = set.catIndex;
 		priorProb = new double[set.noOfCategories];
-		HashSet<String> vocav = new HashSet<String>();
+		HashSet<String> allVocav = new HashSet<String>();
 
 		System.out.println(set.noOfCategories);
 		for (int i = 0; i < set.noOfCategories; i++) {
+			HashSet<String> catVocav = new HashSet<String>();
 			System.out.println(catName[i]);
 			HashMap<String,Integer> freq = new HashMap<String,Integer>();
 			HashMap<String,HashMap<String,Integer>> freq2 = new HashMap<String, HashMap<String,Integer>>();
@@ -174,7 +172,8 @@ public class NaiveBayesTextClassifier {
 				String lastW = "";
 				while (it.hasNext()) {
 					String w = it.next();
-					vocav.add(w);
+					catVocav.add(w);
+					allVocav.add(w);
 
 					Integer got = freq.get(w);
 					if (got == null) { got = 0; }
@@ -197,6 +196,8 @@ public class NaiveBayesTextClassifier {
 			for (String w : freq.keySet()) {
 				prob.put(w, Math.log(freq.get(w))-Math.log(set.noOfWords[i]));
 			}
+			// smoothing parameter
+			prob.put("", (double)catVocav.size());
 			likelihood.add(prob);
 
 			HashMap<String,HashMap<String,Double>> prob2 = new HashMap<String,HashMap<String,Double>>();
@@ -211,7 +212,15 @@ public class NaiveBayesTextClassifier {
 			bigramProbs.add(prob2);
 		}
 
-		unknownWordProb = - Math.log(vocav.size());
+		unknownWordProb = - Math.log(allVocav.size());
+
+		for (HashMap<String,Double> probs : likelihood) {
+			double catVocavSize = probs.remove("");
+			for (String w : allVocav) {
+				if (!probs.containsKey(w))
+					probs.put(w, -Math.log(catVocavSize+allVocav.size()));
+			}
+		}
 	}
 
 	/**
