@@ -86,12 +86,14 @@ public class Datapoint {
 		return bigramCount.get(word);
 	}
 
-	public Integer countBigram(String w1, String w2) {
+	public int countBigram(String w1, String w2) {
 		HashMap<String,Integer> counts = bigramCount.get(w1);
-		if(counts == null) {
-			return null;
-		}
-		return counts.get(w2);
+		if (counts == null)
+			return 0;
+		Integer got = counts.get(w2);
+		if (got == null)
+			return 0;
+		return got;
 	}
 
 	public String toString() {

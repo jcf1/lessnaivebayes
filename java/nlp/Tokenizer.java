@@ -76,6 +76,8 @@ public class Tokenizer {
 	 *  Returns true if the character is a punctuation character.
 	 */
 	public boolean punctuation( char c ) {
+		if (c == 35)
+			return false;
 		if ( c >= 32 && c <= 47 )
 			return true;
 		if ( c >= 58 && c <= 64 )
@@ -99,6 +101,8 @@ public class Tokenizer {
 		char c = buf[ptr];
 		if (Character.isLetter(c))
 			buf[ptr] = Character.toLowerCase( c );
+		if (punctuation(c))
+			return false;
 		return !Character.isWhitespace(c);
 	}
 

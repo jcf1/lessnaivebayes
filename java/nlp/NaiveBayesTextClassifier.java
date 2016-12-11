@@ -157,6 +157,8 @@ public class NaiveBayesTextClassifier {
 
 		System.out.println(set.noOfCategories);
 		for (int i = 0; i < set.noOfCategories; i++) {
+			int allWords = 0;
+			int catWords = 0;
 			HashSet<String> catVocav = new HashSet<String>();
 			System.out.println(catName[i]);
 			HashMap<String,Integer> freq = new HashMap<String,Integer>();
@@ -180,12 +182,17 @@ public class NaiveBayesTextClassifier {
 					freq.put(w, got + p.count(w));
 
 					HashMap<String,Integer> test = freq2.get(lastW);
-					if (test == null) { test = new HashMap<String,Integer>(); }
+					if (test == null) {
+						test = new HashMap<String,Integer>();
+						freq2.put(lastW, test);
+					}
 					HashMap<String,Integer> bigramCount = p.getBigrams(lastW);
-					if(bigramCount != null) {
-						for(String word : bigramCount.keySet()) {
-							test.put(word, p.countBigram(lastW, word));
-							freq2.put(lastW, test);
+					if (bigramCount != null) {
+						for (String word : bigramCount.keySet()) {
+							Integer had = test.get(word);
+							if (had == null)
+								had = 0;
+							test.put(word, had+p.countBigram(lastW, word));
 						}
 					}
 					lastW = w;
@@ -197,7 +204,7 @@ public class NaiveBayesTextClassifier {
 				prob.put(w, Math.log(freq.get(w))-Math.log(set.noOfWords[i]));
 			}
 			// smoothing parameter
-			prob.put("", (double)catVocav.size());
+			prob.put("", -Math.log(set.totNoOfWords+set.noOfWords[i]));
 			likelihood.add(prob);
 
 			HashMap<String,HashMap<String,Double>> prob2 = new HashMap<String,HashMap<String,Double>>();
@@ -215,10 +222,11 @@ public class NaiveBayesTextClassifier {
 		unknownWordProb = - Math.log(allVocav.size());
 
 		for (HashMap<String,Double> probs : likelihood) {
-			double catVocavSize = probs.remove("");
+			double smoothing = probs.remove("");
 			for (String w : allVocav) {
-				if (!probs.containsKey(w))
-					probs.put(w, -Math.log(catVocavSize+allVocav.size()));
+				Double got = probs.get(w);
+				if (got == null || got < smoothing)
+					probs.put(w, smoothing);
 			}
 		}
 	}

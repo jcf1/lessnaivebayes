@@ -31,6 +31,9 @@ public class Dataset {
 	/** The number of data points per category. */
 	public int[] noOfDatapoints;
 
+	/** The number of words. */
+	public int totNoOfWords;
+
 	/** The number of words per category. */
 	public int[] noOfWords;
 
@@ -67,6 +70,7 @@ public class Dataset {
 				if ( text!=null && category!=null ) {
 					Datapoint dp = new Datapoint( text, category );
 					point.add( dp );
+					totNoOfWords += dp.noOfWords;
 					noOfWords[cIndex] += dp.noOfWords;
 					noOfDatapoints[cIndex]++;
 				}

@@ -7,7 +7,7 @@ if ! [ ${KEEP_DONE+1} ]; then
 	done
 fi
 [ ${ALREADY_COMPILED+1} ] || sh java_compile.sh
-ALREADY_COMPILED=1
+export ALREADY_COMPILED=1
 
 pids=''
 for fst; do
