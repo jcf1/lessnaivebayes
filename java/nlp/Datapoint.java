@@ -69,10 +69,10 @@ public class Datapoint {
 		}
 	}
 
-  public Tokenizer readText() {
-    StringReader reader = new StringReader( text + "\n" );
-    return new Tokenizer( reader );
-  }
+	public Tokenizer readText() {
+		StringReader reader = new StringReader( text + "\n" );
+		return new Tokenizer( reader );
+	}
 
 	public Iterator<String> iterator() {
 		return word.keySet().iterator();

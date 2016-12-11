@@ -138,7 +138,7 @@ public class NaiveBayesTextClassifier {
 				result += i + ". " + guesses[i] + " " + probs[i] + "\n";
 			}
 		}
-		
+
 		return result;
 	}
 
