@@ -3,6 +3,7 @@
  *  Natural Language Processing course at Williams.
  *
  *  Author: Johan Boye
+ *  Edited by John Freeman and Michael Zuo
  */
 
 package nlp;
@@ -30,6 +31,13 @@ public class NaiveBayesTextClassifier {
 	 */
 	ArrayList<HashMap<String,Double>> likelihood = new ArrayList<HashMap<String,Double>>();
 
+	/**
+	 *  Model parameters: P(P(word1|word2)|cat)
+	 *  The index in the arraylist corresponds to the identifier
+	 *  of the category, key for first hashmap corresponds to
+	 *	last word seen, and key for second hashmap corresponds to
+	 *	current word being processed.
+	 */
 	ArrayList<HashMap<String,HashMap<String,Double>>> bigramProbs = new ArrayList<HashMap<String,HashMap<String,Double>>>();
 
 	/**  Prior probabilities P(cat) for all the categories. */
@@ -41,9 +49,10 @@ public class NaiveBayesTextClassifier {
 	 */
 	double unknownWordProb;
 
+	/**
+	 *	If true, use bigram probabilities in classify Datapoint.  Else use unigram probabilities.
+	*/
 	boolean useBigram;
-	double threshold;
-	int maxCategories;
 
 	/**
 	 *  Computes the posterior probability P(cat|d) = P(cat|w1 ... wn) =
@@ -84,49 +93,13 @@ public class NaiveBayesTextClassifier {
 			}
 		}
 
-		String result = "";
-		if(maxCategories == 1) {
-			int guess = 0;
-			for (int i = 1; i < priorProb.length; i++) {
-				if (postProb[guess] < postProb[i]) {
-					guess = i;
-				}
-			}
-			result = catName[guess];
-		} else {
-			int count = 0;
-			int[] guesses = new int[maxCategories];
-			double[] probs = new double[maxCategories];
-
-			for (int i = 0; i < priorProb.length; i++) {
-				double guess = postProb[i];
-				if(guess > threshold && (count < maxCategories || guess > probs[maxCategories - 1])) {
-					int index = count;
-					for(int j = 0; j < count; j++) {
-						if(guess > probs[j]) {
-							index = j;
-							break;
-						}
-					}
-					int ind = i;
-					double val = guess;
-					for(int j = index; j < count; j++) {
-						int tempInd = guesses[j];
-						double tempVal = probs[j];
-						guesses[j] = ind;
-						probs[j] = val;
-						ind = tempInd;
-						val = tempVal;
-					}
-				}
-			}
-
-			for(int i = 0; i < count; i++) {
-				result += i + ". " + guesses[i] + " " + probs[i] + "\n";
+		int guess = 0;
+		for (int i = 1; i < priorProb.length; i++) {
+			if (postProb[guess] < postProb[i]) {
+				guess = i;
 			}
 		}
-
-		return result;
+		return catName[guess];
 	}
 
 	/**
@@ -238,10 +211,8 @@ public class NaiveBayesTextClassifier {
 	 *   Constructor. Read the training file and, possibly, the test
 	 *   file. If test file is null, read input from the keyboard.
 	 */
-	public NaiveBayesTextClassifier( String training_file, String test_file, boolean useBigram, double threshold, int maxCategories ) {
+	public NaiveBayesTextClassifier( String training_file, String test_file, boolean useBigram ) {
 		this.useBigram = useBigram;
-		this.threshold = threshold;
-		this.maxCategories = maxCategories;
 		try {
 			buildModel( new Dataset( training_file ));
 			classifyTestset( new Dataset( test_file ));
@@ -259,8 +230,6 @@ public class NaiveBayesTextClassifier {
 		System.err.println( "  -1 : Force use of unigrams (default)" );
 		System.err.println( "  -2 : Use bigram probabilities" );
 		System.err.println( "  -bi : Compatibility name for -2" );
-		System.err.println( "  -th <double> : Only return a category above this threshold score (optional, defualt negative infinity)");
-		System.err.println( "  -max <int> : Maximum amount of categories that is returned (optional, default 1)" );
 	}
 
 	public static void main( String[] args ) {
@@ -268,8 +237,6 @@ public class NaiveBayesTextClassifier {
 		String training_file = null;
 		String test_file = null;
 		boolean useBigram = false;
-		double threshold = Double.NEGATIVE_INFINITY;
-		int maxCategories = 1;
 		int i = 0;
 		while ( i<args.length ) {
 			if ( args[i].equals( "-d" )) {
@@ -300,43 +267,13 @@ public class NaiveBayesTextClassifier {
 				i++;
 				useBigram = true;
 			}
-			else if ( args[i].equals( "-th" )) {
-				i++;
-				if ( i<args.length ) {
-					try {
-						threshold = Double.parseDouble(args[i++]);
-					} catch(NumberFormatException e) {
-						printHelpMessage();
-						return;
-					}
-				}
-				else {
-					printHelpMessage();
-					return;
-				}
-			}
-			else if ( args[i].equals( "-max" )) {
-				i++;
-				if ( i<args.length ) {
-					try {
-						maxCategories = Integer.parseInt(args[i++]);
-					} catch(NumberFormatException e) {
-						printHelpMessage();
-						return;
-					}
-				}
-				else {
-					printHelpMessage();
-					return;
-				}
-			}
 			else {
 				printHelpMessage();
 				return;
 			}
 		}
 		if ( training_file != null && test_file != null ) {
-			new NaiveBayesTextClassifier( training_file, test_file, useBigram, threshold, maxCategories );
+			new NaiveBayesTextClassifier( training_file, test_file, useBigram );
 		}
 		else {
 			printHelpMessage();
