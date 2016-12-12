@@ -51,54 +51,36 @@ public class NaiveBayesTextClassifier {
 	 *
 	 *  @return The name of the winning category (i.e. argmax P(cat|d) ).
 	 */
-	String classifyDatapoint( Datapoint d ) {
+	String classifyDatapoint( Datapoint d ) throws IOException {
 		double postProb[] = new double[priorProb.length];
 
-		for (int i = priorProb.length-1; i >= 0; i--) {
+		for (int i = priorProb.length-1; i >= 0; i--)
 			postProb[i] = Math.log(priorProb[i]);
-		}
 
-		if (!useBigram) {
-			Iterator<String> it = d.iterator();
-			while (it.hasNext()) {
-				String w = it.next();
-				for (int i = priorProb.length-1; i >= 0; i--) {
-					Double prob = likelihood.get(i).get(w);
-					if (prob == null) {
-						prob = 0.0;
-					}
-					prob += unknownWordProb;
-					postProb[i] += d.count(w)*Math.log(prob);
-				}
-			}
-		}
-		else {
-			try {
-				Tokenizer tokens = d.readText();
-				String lastWord = "";
-				while (tokens.hasMoreTokens()) {
-					String w = tokens.nextToken();
-					for (int i = priorProb.length-1; i >= 0; i--) {
-						Double prob1 = likelihood.get(i).get(w);
-						if (prob1 == null)
-							prob1 = 0.0;
-						prob1 += unknownWordProb;
+		String lastWord = "^head";
+		Tokenizer tokens = d.readText();
+		while (tokens.hasMoreTokens()) {
+			String w = tokens.nextToken();
+			for (int i = priorProb.length-1; i >= 0; i--) {
+				Double prob1 = likelihood.get(i).get(w);
+				if (prob1 == null)
+					prob1 = 0.0;
+				prob1 += unknownWordProb;
 
-						HashMap<String,Double> counts = bigramProbs.get(i).get(lastWord);
-						if (counts == null)
-							counts = likelihood.get(i);
-						Double prob2 = counts.get(w);
-						if (prob2 == null)
-							prob2 = 0.0;
-						prob2 += unknownWordProb;
+				if (!useBigram)
+					postProb[i] += Math.log(prob1);
+				else {
+					HashMap<String,Double> counts = bigramProbs.get(i).get(lastWord);
+					if (counts == null)
+						counts = likelihood.get(i);
+					Double prob2 = counts.get(w);
+					if (prob2 == null)
+						prob2 = 0.0;
+					prob2 += unknownWordProb;
 
-						postProb[i] += Math.log(prob1 + prob2);
-					}
+					postProb[i] += Math.log(prob2*0.1 + prob1*0.9);
 					lastWord = w;
 				}
-			}
-			catch ( IOException e ) {
-				e.printStackTrace();
 			}
 		}
 
@@ -156,86 +138,85 @@ public class NaiveBayesTextClassifier {
 	 *   Laplace smoothing is used in order to avoid that certain
 	 *   probabilities become zero.
 	 */
-	void buildModel( Dataset set ) {
+	void buildModel( Dataset set ) throws IOException {
 		// First copy some essential info from the training_set.
 		catName = set.catName;
 		catIndex = set.catIndex;
 		priorProb = new double[set.noOfCategories];
 		HashSet<String> allVocav = new HashSet<String>();
 
+		for (Datapoint p : set.point) {
+			Iterator<String> it = p.iterator();
+			while (it.hasNext())
+				allVocav.add(it.next());
+		}
+		unknownWordProb = 1.0/allVocav.size();
+
 		System.out.println(set.noOfCategories);
 		for (int i = 0; i < set.noOfCategories; i++) {
+			System.out.println(catName[i]);
 			int allWords = 0;
 			int catWords = 0;
-			HashSet<String> catVocav = new HashSet<String>();
-			System.out.println(catName[i]);
 			HashMap<String,Integer> freq = new HashMap<String,Integer>();
 			HashMap<String,HashMap<String,Integer>> freq2 = new HashMap<String, HashMap<String,Integer>>();
+			HashSet<String> catVocav = new HashSet<String>();
 
-			freq.put("", set.noOfDatapoints[i]);
 			priorProb[i] = 1.0*set.noOfDatapoints[i]/set.totNoOfDatapoints;
 
+			// impossible token used as initial value of lastW ~ head of string
+			freq.put("^head", set.noOfDatapoints[i]);
 			for (Datapoint p : set.point) {
 				if (catIndex.get(p.cat) != i) { continue; }
 
-				Iterator<String> it = p.iterator();
-				String lastW = "";
-				while (it.hasNext()) {
-					String w = it.next();
+				String lastW = "^head";
+				Tokenizer tokens = p.readText();
+				while (tokens.hasMoreTokens()) {
+					String w = tokens.nextToken();
 					catVocav.add(w);
-					allVocav.add(w);
 
-					Integer got = freq.get(w);
-					if (got == null) { got = 0; }
-					freq.put(w, got + p.count(w));
+					Integer oldfreq = freq.get(w);
+					if (oldfreq == null)
+						oldfreq = 0;
+					freq.put(w, oldfreq+1);
 
-					HashMap<String,Integer> test = freq2.get(lastW);
-					if (test == null) {
-						test = new HashMap<String,Integer>();
-						freq2.put(lastW, test);
+					HashMap<String,Integer> counts = freq2.get(lastW);
+					if (counts == null) {
+						counts = new HashMap<String,Integer>();
+						counts.put(w, 1);
+						freq2.put(lastW, counts);
 					}
-					HashMap<String,Integer> bigramCount = p.getBigrams(lastW);
-					if (bigramCount != null) {
-						for (String word : bigramCount.keySet()) {
-							Integer had = test.get(word);
-							if (had == null)
-								had = 0;
-							test.put(word, had+p.countBigram(lastW, word));
-						}
+					else {
+						Integer oldfreq2 = counts.get(w);
+						if (oldfreq2 == null)
+							oldfreq2 = 0;
+						counts.put(w, oldfreq2+1);
 					}
 					lastW = w;
 				}
 			}
 
 			HashMap<String,Double> prob = new HashMap<String,Double>();
-			for (String w : freq.keySet()) {
-				prob.put(w, 1.0*freq.get(w)/set.noOfWords[i]);
+			for (String w : allVocav) {
+				Integer seen = freq.get(w);
+				if (seen == null)
+					seen = 0;
+				prob.put(w, (seen+1.0)/set.noOfWords[i]);
 			}
-			// smoothing parameter
-			prob.put("", 1.0/set.noOfWords[i]);
 			likelihood.add(prob);
 
 			HashMap<String,HashMap<String,Double>> prob2 = new HashMap<String,HashMap<String,Double>>();
 			for (String w1 : freq2.keySet()) {
 				HashMap<String,Integer> counts = freq2.get(w1);
-				HashMap<String,Double> temp = new HashMap<String,Double>();
-				for(String w2 : counts.keySet()) {
-					temp.put(w2, 1.0*counts.get(w2) / freq.get(w1));
-				}
-				prob2.put(w1, temp);
+				HashMap<String,Double> cond = new HashMap<String,Double>();
+				int total = counts.size(); // extra for smoothing
+				for (int partial : counts.values())
+					total += partial;
+
+				for (String w2 : counts.keySet())
+					cond.put(w2, (counts.get(w2)+1.0) / total);
+				prob2.put(w1, cond);
 			}
 			bigramProbs.add(prob2);
-		}
-
-		unknownWordProb = 1.0/allVocav.size();
-
-		for (HashMap<String,Double> probs : likelihood) {
-			double smoothing = probs.remove("");
-			for (String w : allVocav) {
-				Double got = probs.get(w);
-				if (got == null || got < smoothing)
-					probs.put(w, smoothing);
-			}
 		}
 	}
 
@@ -243,7 +224,7 @@ public class NaiveBayesTextClassifier {
 	 *   Goes through a testset, classifying each datapoint according
 	 *   to the model.
 	 */
-	void classifyTestset( Dataset testset ) {
+	void classifyTestset( Dataset testset ) throws IOException {
 		System.out.println(testset.totNoOfDatapoints);
 		Iterator<Datapoint> iter = testset.iterator();
 		while ( iter.hasNext() ) {
@@ -261,8 +242,13 @@ public class NaiveBayesTextClassifier {
 		this.useBigram = useBigram;
 		this.threshold = threshold;
 		this.maxCategories = maxCategories;
-		buildModel( new Dataset( training_file ));
-		classifyTestset( new Dataset( test_file ));
+		try {
+			buildModel( new Dataset( training_file ));
+			classifyTestset( new Dataset( test_file ));
+		}
+		catch ( IOException e ) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Prints usage information. */
