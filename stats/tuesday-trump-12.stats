@@ -1,0 +1,16 @@
+17885	1-gram	*	accuracy	90.71%	(2627/2896)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	1-gram	1	confusion	o|tuesday	o|trump	observed/expected
+17885	1-gram	2	confusion	2404	216	e|tuesday
+17885	1-gram	3	confusion	53	223	e|trump
+17885	1-gram	trump	precision	50.79%	(223/439)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	1-gram	trump	recall	80.79%	(223/276)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	1-gram	tuesday	precision	97.84%	(2404/2457)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	1-gram	tuesday	recall	91.75%	(2404/2620)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	2-gram	*	accuracy	74.86%	(2168/2896)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	2-gram	1	confusion	o|tuesday	o|trump	observed/expected
+17885	2-gram	2	confusion	1913	707	e|tuesday
+17885	2-gram	3	confusion	21	255	e|trump
+17885	2-gram	trump	precision	26.50%	(255/962)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	2-gram	trump	recall	92.39%	(255/276)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	2-gram	tuesday	precision	98.91%	(1913/1934)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
+17885	2-gram	tuesday	recall	73.01%	(1913/2620)	data/tuesday,trump-1.set	data/tuesday,trump-2.set
