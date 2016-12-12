@@ -1,0 +1,16 @@
+4174	1-gram	*	accuracy	73.63%	(215/292)	data/love,politics-1.set	data/love,politics-2.set
+4174	1-gram	1	confusion	o|love	o|politics	observed/expected
+4174	1-gram	2	confusion	66	1	e|love
+4174	1-gram	3	confusion	76	149	e|politics
+4174	1-gram	love	precision	46.47%	(66/142)	data/love,politics-1.set	data/love,politics-2.set
+4174	1-gram	love	recall	98.50%	(66/67)	data/love,politics-1.set	data/love,politics-2.set
+4174	1-gram	politics	precision	99.33%	(149/150)	data/love,politics-1.set	data/love,politics-2.set
+4174	1-gram	politics	recall	66.22%	(149/225)	data/love,politics-1.set	data/love,politics-2.set
+4174	2-gram	*	accuracy	80.82%	(236/292)	data/love,politics-1.set	data/love,politics-2.set
+4174	2-gram	1	confusion	o|love	o|politics	observed/expected
+4174	2-gram	2	confusion	37	30	e|love
+4174	2-gram	3	confusion	26	199	e|politics
+4174	2-gram	love	precision	58.73%	(37/63)	data/love,politics-1.set	data/love,politics-2.set
+4174	2-gram	love	recall	55.22%	(37/67)	data/love,politics-1.set	data/love,politics-2.set
+4174	2-gram	politics	precision	86.89%	(199/229)	data/love,politics-1.set	data/love,politics-2.set
+4174	2-gram	politics	recall	88.44%	(199/225)	data/love,politics-1.set	data/love,politics-2.set
