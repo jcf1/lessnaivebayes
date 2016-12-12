@@ -1,0 +1,16 @@
+17420	1-gram	*	accuracy	91.72%	(709/773)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	1-gram	1	confusion	o|angry	o|trump	observed/expected
+17420	1-gram	2	confusion	479	19	e|angry
+17420	1-gram	3	confusion	45	230	e|trump
+17420	1-gram	angry	precision	91.41%	(479/524)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	1-gram	angry	recall	96.18%	(479/498)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	1-gram	trump	precision	92.36%	(230/249)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	1-gram	trump	recall	83.63%	(230/275)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	2-gram	*	accuracy	73.47%	(568/773)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	2-gram	1	confusion	o|angry	o|trump	observed/expected
+17420	2-gram	2	confusion	303	195	e|angry
+17420	2-gram	3	confusion	10	265	e|trump
+17420	2-gram	angry	precision	96.80%	(303/313)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	2-gram	angry	recall	60.84%	(303/498)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	2-gram	trump	precision	57.60%	(265/460)	data/angry,trump-1.set	data/angry,trump-2.set
+17420	2-gram	trump	recall	96.36%	(265/275)	data/angry,trump-1.set	data/angry,trump-2.set
