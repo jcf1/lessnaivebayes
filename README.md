@@ -109,3 +109,7 @@ each pair. Output is the same, but is longer and can have more than one
 
 Like `java_testwith.sh`, this script also tries to parallelize the tests as
 much as possible.
+
+## confusion.rb
+
+Used internally by `java_testwith.sh` to compute a confusion matrix.
