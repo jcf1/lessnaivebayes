@@ -37,7 +37,7 @@ public class NaiveBayesTextClassifier {
 
 	/**
 	 *   The probability of a word we haven't seen before
-	 *	 ( should be -Math.log(size of vocabulary) ).
+	 *	 ( should be 1/(size of vocabulary) ).
 	 */
 	double unknownWordProb;
 
@@ -55,7 +55,7 @@ public class NaiveBayesTextClassifier {
 		double postProb[] = new double[priorProb.length];
 
 		for (int i = priorProb.length-1; i >= 0; i--) {
-			postProb[i] = priorProb[i];
+			postProb[i] = Math.log(priorProb[i]);
 		}
 
 		if (!useBigram) {
@@ -65,9 +65,10 @@ public class NaiveBayesTextClassifier {
 				for (int i = priorProb.length-1; i >= 0; i--) {
 					Double prob = likelihood.get(i).get(w);
 					if (prob == null) {
-						prob = unknownWordProb;
+						prob = 0.0;
 					}
-					postProb[i] += d.count(w)*prob;
+					prob += unknownWordProb;
+					postProb[i] += d.count(w)*Math.log(prob);
 				}
 			}
 		}
@@ -78,13 +79,20 @@ public class NaiveBayesTextClassifier {
 				while (tokens.hasMoreTokens()) {
 					String w = tokens.nextToken();
 					for (int i = priorProb.length-1; i >= 0; i--) {
+						Double prob1 = likelihood.get(i).get(w);
+						if (prob1 == null)
+							prob1 = 0.0;
+						prob1 += unknownWordProb;
+
 						HashMap<String,Double> counts = bigramProbs.get(i).get(lastWord);
 						if (counts == null)
 							counts = likelihood.get(i);
-						Double prob = counts.get(w);
-						if (prob == null)
-							prob = unknownWordProb;
-						postProb[i] += prob;
+						Double prob2 = counts.get(w);
+						if (prob2 == null)
+							prob2 = 0.0;
+						prob2 += unknownWordProb;
+
+						postProb[i] += Math.log(prob1 + prob2);
 					}
 					lastWord = w;
 				}
@@ -165,7 +173,7 @@ public class NaiveBayesTextClassifier {
 			HashMap<String,HashMap<String,Integer>> freq2 = new HashMap<String, HashMap<String,Integer>>();
 
 			freq.put("", set.noOfDatapoints[i]);
-			priorProb[i] = Math.log(set.noOfDatapoints[i]) - Math.log(set.totNoOfDatapoints);
+			priorProb[i] = 1.0*set.noOfDatapoints[i]/set.totNoOfDatapoints;
 
 			for (Datapoint p : set.point) {
 				if (catIndex.get(p.cat) != i) { continue; }
@@ -201,10 +209,10 @@ public class NaiveBayesTextClassifier {
 
 			HashMap<String,Double> prob = new HashMap<String,Double>();
 			for (String w : freq.keySet()) {
-				prob.put(w, Math.log(freq.get(w))-Math.log(set.noOfWords[i]));
+				prob.put(w, 1.0*freq.get(w)/set.noOfWords[i]);
 			}
 			// smoothing parameter
-			prob.put("", -Math.log(set.totNoOfWords+set.noOfWords[i]));
+			prob.put("", 1.0/set.noOfWords[i]);
 			likelihood.add(prob);
 
 			HashMap<String,HashMap<String,Double>> prob2 = new HashMap<String,HashMap<String,Double>>();
@@ -212,14 +220,14 @@ public class NaiveBayesTextClassifier {
 				HashMap<String,Integer> counts = freq2.get(w1);
 				HashMap<String,Double> temp = new HashMap<String,Double>();
 				for(String w2 : counts.keySet()) {
-					temp.put(w2, Math.log(counts.get(w2)) - Math.log(freq.get(w1)));
+					temp.put(w2, 1.0*counts.get(w2) / freq.get(w1));
 				}
 				prob2.put(w1, temp);
 			}
 			bigramProbs.add(prob2);
 		}
 
-		unknownWordProb = - Math.log(allVocav.size());
+		unknownWordProb = 1.0/allVocav.size();
 
 		for (HashMap<String,Double> probs : likelihood) {
 			double smoothing = probs.remove("");
